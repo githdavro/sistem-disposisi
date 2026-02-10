@@ -47,7 +47,27 @@
 
     @stack('styles')
 </head>
-<body x-data="darkMode()" x-init="init()" :class="{ 'dark': isDark }" class="bg-white transition-colors duration-300">
+<body
+    x-data="{
+        ...darkMode(),
+
+        sidebarPinned: localStorage.getItem('sidebarPinned') !== 'false',
+        sidebarHover: false,
+
+        get sidebarOpen() {
+            return this.sidebarPinned || this.sidebarHover
+        },
+
+        toggleSidebar() {
+            this.sidebarPinned = !this.sidebarPinned
+            localStorage.setItem('sidebarPinned', this.sidebarPinned)
+        }
+    }"
+    x-init="init()"
+    :class="{ 'dark': isDark }"
+    class="bg-white transition-colors duration-300"
+>
+
 @if(Auth::check())
 <div class="flex h-screen">
     <!-- Sidebar -->
