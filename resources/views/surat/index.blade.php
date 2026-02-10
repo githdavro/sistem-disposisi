@@ -17,7 +17,7 @@
 
 <div class="bg-white rounded-lg shadow">
     <div class="p-4 border-b">
-        <!-- 使用表单来处理过滤 -->
+        <!-- Filter Form -->
         <form method="GET" action="{{ route('surat.index') }}" class="mb-4">
             <div class="flex flex-wrap gap-2">
                 <input type="hidden" name="filter" value="status">
@@ -48,7 +48,7 @@
             </div>
         </form>
         
-        <!-- 显示当前过滤状态 -->
+        <!-- Show current filter status -->
         @if(request()->has('status') && request('status') != '')
             <div class="text-sm text-gray-600">
                 Menampilkan surat dengan status: <span class="font-semibold">{{ request('status') }}</span>
@@ -65,6 +65,9 @@
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         No.
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nomor Surat
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Pengirim
@@ -92,8 +95,13 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($surat as $index => $item)
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
                             {{ ($surat->currentPage() - 1) * $surat->perPage() + $index + 1 }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="font-mono text-sm bg-gray-50 px-2 py-1 rounded">
+                                {{ $item->nomor_surat ?? '-' }}
+                            </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             {{ $item->pengirim->name }}
@@ -147,7 +155,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="9" class="px-6 py-4 text-center text-gray-500">
                             @if(request()->has('status') && request('status') != '')
                                 Tidak ada surat dengan status "{{ request('status') }}".
                                 <a href="{{ route('surat.index') }}" class="text-blue-600 hover:text-blue-800">

@@ -17,7 +17,13 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
             <h3 class="text-lg font-semibold mb-4">Informasi Surat</h3>
-            <div class="space-y-2">
+            <div class="space-y-3">
+                <div class="flex items-start">
+                    <span class="font-medium w-1/3 pt-1">Nomor Surat:</span>
+                    <span class="font-mono bg-gray-50 px-3 py-1 rounded-lg border">
+                        {{ $surat->nomor_surat ?? '-' }}
+                    </span>
+                </div>
                 <div class="flex">
                     <span class="font-medium w-1/3">Pengirim:</span>
                     <span>{{ $surat->pengirim->name }}</span>
@@ -28,7 +34,7 @@
                 </div>
                 <div class="flex">
                     <span class="font-medium w-1/3">Nominal:</span>
-                    <span>Rp. {{ number_format($surat->nominal, 2, ',', '.') }}</span>
+                    <span class="font-medium">Rp. {{ number_format($surat->nominal, 2, ',', '.') }}</span>
                 </div>
                 <div class="flex">
                     <span class="font-medium w-1/3">Sifat:</span>
@@ -58,23 +64,33 @@
                     <span class="font-medium w-1/3">Tanggal Kirim:</span>
                     <span>{{ $surat->created_at->format('d/m/Y H:i') }}</span>
                 </div>
+                @if($surat->updated_at != $surat->created_at)
+                    <div class="flex">
+                        <span class="font-medium w-1/3">Terakhir Diupdate:</span>
+                        <span>{{ $surat->updated_at->format('d/m/Y H:i') }}</span>
+                    </div>
+                @endif
             </div>
         </div>
         
         <div>
-            <h3 class="text-lg font-semibold mb-4">Dokumen</h3>
-            <div class="space-y-2">
-                <div>
+            <h3 class="text-lg font-semibold mb-4">Dokumen & Catatan</h3>
+            <div class="space-y-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
                     <span class="font-medium block mb-2">File Surat:</span>
-                    <a href="{{ asset('storage/surat/' . $surat->file) }}" target="_blank" class="text-blue-600 hover:text-blue-800">
-                        <i class="fas fa-file-alt mr-2"></i> Lihat File
+                    <a href="{{ asset('storage/surat/' . $surat->file) }}" target="_blank" 
+                       class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
+                        <i class="fas fa-file-pdf mr-2 text-red-500"></i> 
+                        {{ $surat->file }}
+                        <i class="fas fa-external-link-alt ml-2 text-sm"></i>
                     </a>
+                    <p class="text-gray-500 text-xs mt-2">Klik untuk melihat atau download file</p>
                 </div>
                 
                 @if($surat->catatan)
-                    <div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
                         <span class="font-medium block mb-2">Catatan:</span>
-                        <p class="text-gray-700">{{ $surat->catatan }}</p>
+                        <p class="text-gray-700 whitespace-pre-line">{{ $surat->catatan }}</p>
                     </div>
                 @endif
             </div>
@@ -84,7 +100,7 @@
 
 @if($surat->approval->count() > 0)
     <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold mb-4">Approval</h3>
+        <h3 class="text-lg font-semibold mb-4">Riwayat Approval</h3>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -110,7 +126,12 @@
                     @foreach($surat->approval as $approval)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {{ $approval->approver->name }}
+                                <div class="flex items-center">
+                                    <div>
+                                        <div class="font-medium">{{ $approval->approver->name }}</div>
+                                        <div class="text-gray-500 text-sm">{{ $approval->approver->jabatan ?? '-' }}</div>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -125,8 +146,9 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($approval->file_catatan)
-                                    <a href="{{ asset('storage/approval/' . $approval->file_catatan) }}" target="_blank" class="text-blue-600 hover:text-blue-800">
-                                        <i class="fas fa-file-alt"></i> Lihat File
+                                    <a href="{{ asset('storage/approval/' . $approval->file_catatan) }}" target="_blank" 
+                                       class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-file-alt mr-1"></i> File
                                     </a>
                                 @else
                                     -
@@ -219,7 +241,6 @@
         </button>
     </form>
 @endif
-
         
         @if(Auth::user()->hasRole('Pengadaan') && $surat->status == 'Disetujui')
             <a href="{{ route('surat.kirim-ke-unit', $surat->id) }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" onclick="return confirm('Apakah Anda yakin ingin mengirim surat ini ke unit tujuan?')">

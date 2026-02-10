@@ -9,10 +9,11 @@ class Unit extends Model
 {
     use HasFactory;
     
-    protected $table = 'unit'; // Tambahkan baris ini
+    protected $table = 'unit';
     
     protected $fillable = [
         'nama_unit',
+        'kode_unit', // Tambahkan ini
     ];
     
     public function user()

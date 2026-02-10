@@ -45,87 +45,77 @@ class SuratController extends Controller
     }
     
     public function store(Request $request)
-    {
-        // 1️⃣ VALIDASI
-        $request->validate([
-            'unit_tujuan_id' => 'required|exists:unit,id',
-            'file' => 'required|file|mimes:pdf,doc,docx|max:2048',
-            'catatan' => 'nullable|string',
-            'sifat' => 'required|in:Rahasia,Penting,Disegerakan',
-            'nominal' => 'required|numeric|min:0',
-        ]);
+{
+    // 1️⃣ VALIDASI
+    $request->validate([
+        'unit_tujuan_id' => 'required|exists:unit,id',
+        'file' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        'catatan' => 'nullable|string',
+        'sifat' => 'required|in:Rahasia,Penting,Disegerakan',
+        'nominal' => 'required|numeric|min:0',
+    ]);
 
-        // 2️⃣ CEK FILE (AMAN)
-        if (!$request->hasFile('file')) {
-            return back()
-                ->withErrors(['file' => 'File surat wajib diupload'])
-                ->withInput();
-        }
-
-        $user = Auth::user();
-
-        // 3️⃣ UPLOAD FILE (FIXED)
-        $file = $request->file('file');
-
-        $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-
-        // 🔥 INI BARIS PALING PENTING (AMAN)
-        Storage::disk('public')->putFileAs(
-            'surat',
-            $file,
-            $fileName
-        );
-
-        // 4️⃣ CREATE SURAT
-        $surat = Surat::create([
-            'pengirim_id' => $user->id,
-            'unit_tujuan_id' => $request->unit_tujuan_id,
-            'file' => $fileName,
-            'catatan' => $request->catatan,
-            'sifat' => $request->sifat,
-            'nominal' => $request->nominal,
-            'status' => 'Menunggu',
-        ]);
-
-        // 5️⃣ LOGIKA APPROVAL
-        if ($request->nominal > 1000000) {
-
-            $direktur = User::role('Direktur')->first();
-
-            if ($direktur) {
-                Approval::create([
-                    'surat_id' => $surat->id,
-                    'approver_id' => $direktur->id,
-                    'status' => 'Menunggu',
-                ]);
-
-                $surat->update(['status' => 'Diproses']);
-
-                Notifikasi::create([
-                    'user_id' => $direktur->id,
-                    'surat_id' => $surat->id,
-                    'judul' => 'Surat Menunggu Approval',
-                    'pesan' => 'Ada surat yang menunggu approval Anda dengan nominal lebih dari 1 juta.',
-                ]);
-            }
-
-        } else {
-
-            $pengadaan = User::role('Pengadaan')->first();
-
-            if ($pengadaan) {
-                Notifikasi::create([
-                    'user_id' => $pengadaan->id,
-                    'surat_id' => $surat->id,
-                    'judul' => 'Surat Baru Masuk',
-                    'pesan' => 'Ada surat baru yang perlu diproses.',
-                ]);
-            }
-        }
-
-        return redirect()->route('surat.index')
-            ->with('success', 'Surat berhasil dikirim.');
+    // 2️⃣ CEK FILE
+    if (!$request->hasFile('file')) {
+        return back()
+            ->withErrors(['file' => 'File surat wajib diupload'])
+            ->withInput();
     }
+
+    $user = Auth::user();
+
+    // 3️⃣ UPLOAD FILE
+    $file = $request->file('file');
+    $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+    Storage::disk('public')->putFileAs('surat', $file, $fileName);
+
+    // 4️⃣ CREATE SURAT (nomor surat akan otomatis digenerate oleh event)
+    $surat = Surat::create([
+        'pengirim_id' => $user->id,
+        'unit_tujuan_id' => $request->unit_tujuan_id,
+        'file' => $fileName,
+        'catatan' => $request->catatan,
+        'sifat' => $request->sifat,
+        'nominal' => $request->nominal,
+        'status' => 'Menunggu',
+    ]);
+
+    // 5️⃣ LOGIKA APPROVAL
+    if ($request->nominal > 1000000) {
+        $direktur = User::role('Direktur')->first();
+
+        if ($direktur) {
+            Approval::create([
+                'surat_id' => $surat->id,
+                'approver_id' => $direktur->id,
+                'status' => 'Menunggu',
+            ]);
+
+            $surat->update(['status' => 'Diproses']);
+
+            Notifikasi::create([
+                'user_id' => $direktur->id,
+                'surat_id' => $surat->id,
+                'judul' => 'Surat Menunggu Approval',
+                'pesan' => 'Ada surat yang menunggu approval Anda dengan nominal lebih dari 1 juta.',
+            ]);
+        }
+    } else {
+        $pengadaan = User::role('Pengadaan')->first();
+
+        if ($pengadaan) {
+            Notifikasi::create([
+                'user_id' => $pengadaan->id,
+                'surat_id' => $surat->id,
+                'judul' => 'Surat Baru Masuk',
+                'pesan' => 'Ada surat baru yang perlu diproses.',
+            ]);
+        }
+    }
+
+    return redirect()->route('surat.index')
+        ->with('success', 'Surat berhasil dikirim dengan nomor: ' . $surat->nomor_surat);
+}
     public function show($id)
     {
         $surat = Surat::with(['pengirim', 'unitTujuan', 'approval', 'disposisi'])->findOrFail($id);
