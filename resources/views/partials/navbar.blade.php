@@ -1,4 +1,11 @@
-<nav class="fixed top-4 left-[17rem] w-[calc(100%-18rem)] max-w-[calc(100%-12rem)] bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-gray-200 dark:border-neutral-700 rounded-lg z-50 px-6" id="layout-navbar">
+<nav
+    class="sticky top-4 mx-6
+           bg-white/80 dark:bg-neutral-900/80
+           backdrop-blur-md
+           border border-gray-200 dark:border-neutral-700
+           rounded-xl z-40
+           transition-all duration-300"
+>
     <div class="px-6">
         <div class="flex justify-between h-16 items-center">
             <!-- Logo / Title -->
@@ -7,13 +14,17 @@
             </a>
 
             <!-- Right Menu -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
 
                 <!-- Theme Switcher -->
                 <div class="relative" x-data="{ themeOpen: false }">
-                    <button @click="themeOpen = !themeOpen" class="flex items-center text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white rounded-full focus:outline-none">
-                        <i class="material-symbols-outlined text-xl" x-show="!isDark">light_mode</i>
-                        <i class="material-symbols-outlined text-xl" x-show="isDark">dark_mode</i>
+                    <button @click="themeOpen = !themeOpen" class=" w-10 h-10 
+                flex items-center justify-center 
+                rounded-full 
+                hover:bg-gray-100 
+                transition-colors duration-200">
+                        <i class="material-symbols-outlined text-2xl" x-show="!isDark">light_mode</i>
+                        <i class="material-symbols-outlined text-2xl" x-show="isDark">dark_mode</i>
                     </button>
 
                    <div x-show="themeOpen" 
@@ -21,7 +32,7 @@
                         x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0 scale-95"
                         x-transition:enter-end="opacity-100 scale-100"
-                        class="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden p-1">
+                        class="absolute right-0 mt-2 w-44 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl shadow-2xl z-50 overflow-hidden p-1">
                         
                         <button @click="isDark = false; localStorage.setItem('dark_mode', false); themeOpen = false" 
                                 :class="!isDark ? 'bg-red-50 text-red-600' : 'text-gray-700 dark:text-gray-300'"
@@ -31,7 +42,7 @@
                         </button>
                         
                         <button @click="isDark = true; localStorage.setItem('dark_mode', true); themeOpen = false" 
-                                :class="isDark ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 dark:text-gray-300'"
+                                :class="isDark ? 'bg-indigo-900/70 text-indigo-300' : 'text-gray-700 dark:text-gray-300'"
                                 class="w-full flex items-center text-left px-3 py-2.5 rounded-lg transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 group">
                             <i class="material-symbols-outlined mr-3 text-[20px] group-hover:-rotate-12 transition-transform">dark_mode</i>
                             <span class="text-sm font-medium">Dark</span>
@@ -47,7 +58,7 @@
 
                 <!-- Quick Links -->
 
-                    <div class="relative" x-data="{ quickOpen: false }">
+                    {{-- <div class="relative" x-data="{ quickOpen: false }">
                         <button @click="quickOpen = !quickOpen" class="flex items-center text-gray-700 dark:text-neutral-200 dark:hover:text-[#FF2D20] focus:outline-none">
                             <i class="material-symbols-outlined text-2xl">apps</i>
                         </button>
@@ -79,11 +90,15 @@
                                 </a>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
 
                 <!-- Notifikasi -->
                 <div class="relative" x-data="{ notifOpen: false }">
-                    <button @click="notifOpen = !notifOpen" class="flex items-center text-gray-700 dark:text-white focus:outline-none">
+                    <button @click="notifOpen = !notifOpen" class=" w-10 h-10 
+                flex items-center justify-center 
+                rounded-full 
+                hover:bg-gray-100 
+                transition-colors duration-200">
                         <i class="material-symbols-outlined text-2xl">notifications</i>
                         
                         @if(Auth::user()->notifikasi()->where('dibaca', false)->count() > 0)
@@ -94,7 +109,7 @@
                     </button>
 
                     <div x-show="notifOpen" @click.away="notifOpen = false" x-transition
-                        class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-50">
+                        class="absolute right-0 mt-2 w-80  bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl shadow-2xl  z-50">
                         
                         <div class="p-4 border-b flex justify-between items-center">
                             <h3 class="text-lg font-semibold text-gray-800">Notifikasi</h3>
@@ -109,15 +124,22 @@
                             @foreach(Auth::user()->notifikasi()->latest()->limit(5)->get() as $notif)
                                 <a href="{{ route('notifikasi.show', $notif->id) }}" class="block p-3 hover:bg-gray-100 border-b {{ $notif->dibaca ? 'bg-gray-50' : '' }}">
                                     <div class="flex items-start">
-                                        <div class="flex-shrink-0 mr-3">
+                                       <div class="flex-shrink-0 mr-3">
                                             @if($notif->tipe == 'surat_masuk')
-                                                <i class="material-symbols-outlined text-blue-500 mt-1">mail</i>
+                                                <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                                                    <i class="material-symbols-outlined text-white text-xl">mail</i>
+                                                </div>
                                             @elseif($notif->tipe == 'disposisi')
-                                                <i class="material-symbols-outlined text-green-500 mt-1">forward_to_inbox</i>
+                                                <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                                                    <i class="material-symbols-outlined text-white text-xl">forward_to_inbox</i>
+                                                </div>
                                             @else
-                                                <i class="material-symbols-outlined text-gray-500 mt-1">info</i>
+                                                <div class="w-10 h-10 rounded-full bg-red-400 flex items-center justify-center">
+                                                    <i class="material-symbols-outlined text-white text-xl">info</i>
+                                                </div>
                                             @endif
                                         </div>
+
                                         <div class="flex-grow">
                                             <p class="font-medium text-gray-800">{{ $notif->judul }}</p>
                                             <p class="text-sm text-gray-600">{{ \Illuminate\Support\Str::limit($notif->pesan, 50) }}</p>
@@ -149,7 +171,9 @@
 
                 <!-- User Menu -->
                 <div class="relative" x-data="{ userOpen: false }">
-                    <button @click="userOpen = !userOpen" class="flex items-center text-gray-700 dark:text-white focus:outline-none">
+                    <button @click="userOpen = !userOpen" class="flex items-center text-gray-700 dark:text-white rounded-full 
+                hover:bg-gray-100 
+                transition-colors duration-200 focus:outline-none">
                         <img src="{{ Auth::user()->avatar ?? asset('images/user.png') }}" alt="{{ Auth::user()->name }}" class="h-8 w-8 rounded-full mr-2">
                         {{ Auth::user()->name }}
                         <i class="fas fa-chevron-down ml-1 text-xs"></i>

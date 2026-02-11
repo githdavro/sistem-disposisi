@@ -4,32 +4,33 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>PT Graha Perdana Medika</title>
+    <title>Welcome | Sistem Disposisi Surat</title>
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Custom Font -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,600,700&display=swap" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Custom Style -->
     <style>
         body {
             font-family: 'Figtree', sans-serif;
-            overflow: hidden; /* HIDE SCROLLBAR */
+            overflow: hidden;
         }
 
-        /* Hide scrollbar (Chrome, Edge, Safari) */
         ::-webkit-scrollbar {
             display: none;
         }
 
-        /* Hide scrollbar (Firefox) */
         html {
             scrollbar-width: none;
         }
     </style>
 </head>
+
 
 <body class="bg-gray-50 text-gray-800">
 
@@ -40,7 +41,7 @@
         <nav class="w-full fixed top-0 z-50 bg-white/80 backdrop-blur border-b border-gray-200">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
                 <h1 class="text-sm sm:text-lg font-bold tracking-wide text-red-600">
-                    PT Graha Perdana Medika
+                    Sistem disposisi surat PT. GPM
                 </h1>
 
                 <div class="space-x-4">
@@ -72,11 +73,11 @@
                     text-gray-900 
                     leading-tight
                 ">
-                    PT Graha Perdana Medika
+                    Landing page test hehe
                 </h2>
 
                 <p class="mt-4 text-gray-600 text-base sm:text-lg">
-                    Sistem Internal Terintegrasi
+                    Sistem Disposisi
                 </p>
 
                 <div class="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center gap-4">
@@ -116,7 +117,7 @@
 
         <!-- FOOTER -->
         <footer class="py-4 text-center text-xs sm:text-sm text-gray-500 border-t border-gray-200">
-            © {{ date('Y') }} PT Graha Perdana Medika. All rights reserved.
+            © {{ date('Y') }} jeneng nde kene. All rights reserved.
         </footer>
 
     </div>

@@ -6,7 +6,7 @@
 
         <div class="shadow-md rounded-lg w-full 
             flex items-center justify-center
-            shadow-lg px-6 py-6 mb-6 relative"
+            shadow-lg px-6 py-9 mb-9 relative"
             style="
                 background-image: 
                     url('/images/background.svg'),
@@ -16,23 +16,15 @@
                 background-blend-mode: overlay;
             ">
 
-            <canvas class="confetti-canvas absolute inset-0"></canvas>
-
             <div class="flex flex-col items-center text-center space-y-2 relative z-10">
 
-                <svg class="h-10 w-10 text-gray-900 flex-shrink-0" fill="currentColor" viewBox="0 0 319 491" xmlns="http://www.w3.org/2000/svg">
-                    <g id="Background">
-                        <!-- SVG Paths -->
-                    </g>
-                </svg>
-
-                <h2 class="text-2xl font-bold text-gray-900 tracking-wide">
+                <h2 class="text-3xl font-black text-gray-900 dark:text-white tracking-wide">
                     Selamat Datang, {{ Auth::user()->name }}! 
                 </h2>
 
-                <h2 class="text-base font-bold text-gray-900">
-                Dashboard Unit sistem disposisi surat PT. GPM
-                </h2>
+                <p class="text-base text-gray-900 dark:text-neutral-100/90">
+                Dashboard Unit Sistem disposisi surat PT. GPM
+                </p>
 
             </div>
         </div>
@@ -45,22 +37,22 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     {{-- Surat Terkirim --}}
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
     <h2 class="text-xl font-semibold mb-4">Surat Terkirim</h2>
 
     @if($suratTerkirim->count() > 0)
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class=" dark:bg-neutral-800">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tujuan</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sifat</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">No.</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tujuan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Sifat</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white hover:bg-red-50 divide-y divide-gray-200">
                     @foreach($suratTerkirim->take(5) as $index => $surat)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">{{ $index + 1 }}</td>
@@ -104,8 +96,8 @@
             </a>
         </div>
 </div>
-
-    <div class="bg-white rounded-lg shadow p-6">
+    
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
     <h2 class="text-xl font-semibold mb-4">Surat Masuk</h2>
 
     @if($suratMasuk->count() > 0)
@@ -165,7 +157,7 @@
 </div>
 
 
-<div class="bg-white rounded-lg shadow p-6">
+<div class="bg-white rounded-lg border border-gray-200 p-6">
     <h2 class="text-xl font-semibold mb-4">Notifikasi Terbaru</h2>
     <div class="space-y-3">
         @foreach($notifikasi->take(5) as $notif)

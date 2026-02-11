@@ -2,8 +2,11 @@
     @mouseenter="sidebarHover = true"
     @mouseleave="sidebarHover = false"
     :class="sidebarOpen ? 'w-64' : 'w-20'"
-    class="bg-white text-gray-800 min-h-screen flex flex-col border-r border-gray-200
-           transition-all duration-300 ease-in-out">
+    class="bg-white text-gray-800 min-h-screen flex flex-col
+           border-r border-gray-200
+           transition-all duration-300 ease-in-out"
+>
+
 
 
     <!-- Logo + Hamburger -->
@@ -11,9 +14,10 @@
     
         <!-- Logo (FIX SIZE, TIDAK CENTER, TIDAK MENGECIL) -->
         <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-            <img src="{{ asset('images/gpm_logoonly.webp') }}"
+               <x-application-logo class="w-10 h-10 fill-current text-gray-500 object-contain shrink-0" />
+            {{-- <img src="{{ asset('images/gpm_logoonly.webp') }}"
                 alt="Logo"
-                class="w-10 h-10 object-contain shrink-0">
+                class="w-10 h-10 object-contain shrink-0"> --}}
 
             <!-- Text hanya hilang saat collapse -->
             <span x-show="sidebarOpen"
@@ -21,24 +25,31 @@
                 class="font-bold text-sm whitespace-nowrap">
                 GPM
             </span>
+            <br>
+            
         </a>
 
         <!-- Hamburger (pojok kanan, ga ngedorong logo) -->
         <!-- Hamburger (HANYA MUNCUL SAAT SIDEBAR TERBUKA) -->
         <!-- Toggle Sidebar (Google Material Symbols) -->
         <button
+            title="Toggle on/off Collapse"
             x-show="sidebarOpen"
             x-transition.opacity
             @click="toggleSidebar"
             :class="sidebarPinned ? 'text-red-600' : 'text-gray-600'"
-            class="absolute right-4 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            class="absolute right-4 
+                w-10 h-10 
+                flex items-center justify-center 
+                rounded-full 
+                hover:bg-gray-100 
+                transition-colors duration-200"
         >
             <span
-                class="material-symbols-outlined"
-                x-text="sidebarPinned ? 'radio_button_checked' : 'radio_button_checked'">
+                class="material-symbols-outlined text-xl leading-none"
+                x-text="sidebarPinned ? 'side_navigation' : 'dock_to_right'">
             </span>
         </button>
-
     </div>
 
 
@@ -48,8 +59,8 @@
         <!-- Dashboard -->
         <a href="{{ route('dashboard') }}"
            class="flex items-center px-4 py-2 rounded-lg transition
-                  hover:bg-red-50 hover:text-red-600
-                  {{ request()->routeIs('dashboard') ? 'bg-red-100 text-red-600' : '' }}">
+                  hover:bg-neutral-50 hover:text-red-600
+                  {{ request()->routeIs('dashboard') ? 'bg-red-50 text-red-600' : '' }}">
             <span class="material-symbols-outlined">dashboard</span>
             <span x-show="sidebarOpen" x-transition class="ml-3">Dashboard</span>
         </a>
@@ -59,7 +70,7 @@
         <a href="{{ route('surat.index') }}"
            class="flex items-center px-4 py-2 rounded-lg transition
                   hover:bg-red-50 hover:text-red-600
-                  {{ request()->routeIs('surat.*') ? 'bg-red-100 text-red-600' : '' }}">
+                  {{ request()->routeIs('surat.*') ? 'bg-red-50 text-red-600' : '' }}">
             <span class="material-symbols-outlined">description</span>
             <span x-show="sidebarOpen" x-transition class="ml-3">Surat</span>
         </a>
@@ -70,7 +81,7 @@
         <a href="{{ route('user.index') }}"
            class="flex items-center px-4 py-2 rounded-lg transition
                   hover:bg-red-50 hover:text-red-600
-                  {{ request()->routeIs('user.*') ? 'bg-red-100 text-red-600' : '' }}">
+                  {{ request()->routeIs('user.*') ? 'bg-red-50 text-red-600' : '' }}">
             <span class="material-symbols-outlined">group</span>
             <span x-show="sidebarOpen" x-transition class="ml-3">Pengguna</span>
         </a>
@@ -81,7 +92,7 @@
         <a href="{{ route('unit.index') }}"
            class="flex items-center px-4 py-2 rounded-lg transition
                   hover:bg-red-50 hover:text-red-600
-                  {{ request()->routeIs('unit.*') ? 'bg-red-100 text-red-600' : '' }}">
+                  {{ request()->routeIs('unit.*') ? 'bg-red-50 text-red-600' : '' }}">
             <span class="material-symbols-outlined">apartment</span>
             <span x-show="sidebarOpen" x-transition class="ml-3">Unit</span>
         </a>
@@ -91,7 +102,7 @@
         <a href="{{ route('notifikasi.index') }}"
            class="flex items-center px-4 py-2 rounded-lg transition
                   hover:bg-red-50 hover:text-red-600
-                  {{ request()->routeIs('notifikasi.*') ? 'bg-red-100 text-red-600' : '' }}">
+                  {{ request()->routeIs('notifikasi.*') ? 'bg-red-50 text-red-600' : '' }}">
             <span class="material-symbols-outlined">notifications</span>
             <span x-show="sidebarOpen" x-transition class="ml-3">Notifikasi</span>
 

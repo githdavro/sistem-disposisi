@@ -1,7 +1,13 @@
-<footer class="relative text-black p-4 text-center">
-    <!-- Layer gradasi -->
-    <div class="absolute inset-0 bg-gradient-to-t from-transparent to-gray-200/80 pointer-events-none"></div>
+<footer class="relative text-black p-4 bg-gray-100">
+    <!-- Layer gradasi (opsional) -->
+    <div class="absolute inset-0 pointer-events-none"></div>
 
     <!-- Konten footer -->
-    <p class="relative">&copy; {{ date('Y') }} Sistem Disposisi Surat. All rights reserved.</p>
+    <div class="relative flex justify-between items-center">
+        <!-- Teks kiri -->
+        <p class="text-sm">&copy; {{ date('Y') }} GitDaVro. All rights reserved.</p>
+
+        <!-- Teks kanan -->
+        <p class="text-sm">Designed by GitDaVro</p>
+    </div>
 </footer>
