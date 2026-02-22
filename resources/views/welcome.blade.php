@@ -36,7 +36,7 @@
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <a href="/">
-                    <x-app-logo-small class=" fill-current text-white" />
+                    <x-app-logo-small class="w-10 h-10 fill-current text-white" />
                     </a>
             </div>
             
