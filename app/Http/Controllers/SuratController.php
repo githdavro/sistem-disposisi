@@ -20,15 +20,22 @@ class SuratController extends Controller
 {
     $user = Auth::user();
     
-    // Ambil parameter status dan sort (default: desc)
+    // Ambil semua parameter filter
     $status = $request->get('status');
-    $sort = $request->get('sort', default: 'desc');
+    $sifat = $request->get('sifat');
+    $sort = $request->get('sort', 'desc');
+    $search = $request->get('search'); // Identitas (Nomor Surat)
+    $unit = $request->get('unit');     // Asal/Tujuan
+    $min_nominal = $request->get('min_nominal');
+    $max_nominal = $request->get('max_nominal');
+    $date_from = $request->get('date_from');
+    $date_to = $request->get('date_to');
 
     $query = Surat::with(['pengirim', 'unitTujuan']);
 
-    // 1. Filter berdasarkan Role
+    // 1. Filter Berdasarkan Role (Existing)
     if ($user->hasRole('Admin') || $user->hasRole('Pengadaan')) {
-        // Tidak ada batasan akses awal
+        // Full akses
     } elseif ($user->hasRole('Unit')) {
         $query->where(function($q) use ($user) {
             $q->where('pengirim_id', $user->id)
@@ -40,12 +47,20 @@ class SuratController extends Controller
         });
     }
 
-    // 2. Filter berdasarkan Status (Jika user memilih filter)
-    $query->when($status, function ($q) use ($status) {
-        return $q->where('status', $status);
-    });
+    // 2. Filter Dinamis Baru
+    $query->when($status, fn($q) => $q->where('status', $status))
+          ->when($sifat, fn($q) => $q->where('sifat', $sifat))
+          ->when($search, fn($q) => $q->where('nomor_surat', 'like', "%{$search}%"))
+          ->when($unit, function($q) use ($unit) {
+              $q->whereHas('unitTujuan', fn($sq) => $sq->where('nama_unit', 'like', "%{$unit}%"))
+                ->orWhereHas('pengirim', fn($sq) => $sq->where('name', 'like', "%{$unit}%"));
+          })
+          ->when($min_nominal, fn($q) => $q->where('nominal', '>=', $min_nominal))
+          ->when($max_nominal, fn($q) => $q->where('nominal', '<=', $max_nominal))
+          ->when($date_from, fn($q) => $q->whereDate('created_at', '>=', $date_from))
+          ->when($date_to, fn($q) => $q->whereDate('created_at', '<=', $date_to));
 
-    // 3. Eksekusi Sorting dan Pagination
+    // 3. Sorting & Pagination
     $surat = $query->orderBy('created_at', $sort)->paginate(10);
 
     return view('surat.index', compact('surat'));

@@ -3,8 +3,8 @@
 @section('title', 'Arsip & Daftar Surat | GPM')
 
 @section('content')
-<div class="w-full space-y-8 pb-12">
-    {{-- Header Section --}}
+<div class="w-full space-y-6 pb-12">
+    {{-- Header Section (Tetap) --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
             <h1 class="text-3xl font-extrabold text-brandDark dark:text-white tracking-tight flex items-center gap-3">
@@ -13,55 +13,91 @@
                 </span>
                 Arsip & Daftar Surat
             </h1>
-            <p class="text-slate-500 dark:text-neutral-400 mt-1 font-medium ml-14">Monitoring alur disposisi dan status dokumen internal.</p>
         </div>
         
         @if(Auth::user()->hasPermissionTo('surat-create'))
-            <a href="{{ route('surat.create') }}" class="inline-flex items-center justify-center px-8 py-4 bg-brandTeal hover:bg-teal-600 text-white text-sm font-black rounded-[1.5rem] shadow-xl shadow-teal-900/10 transition-all transform active:scale-95 group">
-                <span class="material-symbols-outlined mr-2 text-xl font-bold group-hover:rotate-90 transition-transform">add_circle</span>
+            <a href="{{ route('surat.create') }}" class="inline-flex items-center justify-center px-8 py-4 bg-brandTeal hover:bg-teal-600 text-white text-sm font-black rounded-[1.5rem] shadow-xl transition-all active:scale-95 group">
+                <span class="material-symbols-outlined mr-2 text-xl font-bold">add_circle</span>
                 BUAT SURAT BARU
             </a>
         @endif
     </div>
 
-   {{-- Filter & Sort Container --}}
-<div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-6">
-    
-    {{-- Status Filter --}}
-    <div class="bg-white dark:bg-neutral-900 rounded-3xl shadow-sm border border-slate-100 dark:border-neutral-800 p-2 flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
-        {{-- Tombol Semua --}}
-        <a href="{{ request()->fullUrlWithQuery(['status' => '']) }}" 
-           class="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all {{ !request('status') ? 'bg-brandDark text-white shadow-md' : 'text-slate-400 hover:bg-slate-50' }}">
-            Semua
-        </a>
+    {{-- ADVANCED FILTER BOX --}}
+    <div class="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-neutral-800 p-8">
+        <form action="{{ route('surat.index') }}" method="GET" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                {{-- Identitas & Unit --}}
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Identitas & Unit</label>
+                    <div class="relative">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari No. Surat..." 
+                               class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal transition-all">
+                        <i class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-xl">search</i>
+                    </div>
+                    <input type="text" name="unit" value="{{ request('unit') }}" placeholder="Cari Asal/Tujuan..." 
+                           class="w-full px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal transition-all">
+                </div>
 
-        @foreach([
-            'Menunggu' => 'bg-amber-500', 
-            'Diproses' => 'bg-brandTeal', 
-            'Disetujui' => 'bg-emerald-500', 
-            'Ditolak' => 'bg-rose-500', 
-            'Selesai' => 'bg-slate-700'
-        ] as $name => $color)
-            <a href="{{ request()->fullUrlWithQuery(['status' => $name]) }}" 
-               class="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2 {{ request('status') == $name ? $color . ' text-white shadow-md' : 'text-slate-400 hover:bg-slate-50' }}">
-                <span class="w-2 h-2 rounded-full {{ request('status') == $name ? 'bg-white' : $color }}"></span>
-                {{ $name }}
-            </a>
-        @endforeach
-    </div>
+                {{-- Nominal Range --}}
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Filter Nominal (Rp)</label>
+                    <div class="flex flex-col gap-2">
+                        <input type="number" name="min_nominal" value="{{ request('min_nominal') }}" placeholder="Min" class="w-full px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal transition-all">
+                        <input type="number" name="max_nominal" value="{{ request('max_nominal') }}" placeholder="Max" class="w-full px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal transition-all">
+                    </div>
+                </div>
 
-    {{-- Sorting Control --}}
-    <div class="flex items-center bg-slate-100 dark:bg-neutral-800 p-1.5 rounded-2xl border border-slate-200 dark:border-neutral-700 shrink-0">
-        <a href="{{ request()->fullUrlWithQuery(['sort' => 'desc']) }}" 
-           class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all {{ request('sort', 'desc') == 'desc' ? 'bg-white dark:bg-neutral-700 text-brandTeal shadow-sm' : 'text-slate-400' }}">
-            <i class="material-symbols-outlined text-sm">arrow_downward</i> Terbaru
-        </a>
-        <a href="{{ request()->fullUrlWithQuery(['sort' => 'asc']) }}" 
-           class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all {{ request('sort') == 'asc' ? 'bg-white dark:bg-neutral-700 text-brandTeal shadow-sm' : 'text-slate-400' }}">
-            <i class="material-symbols-outlined text-sm">arrow_upward</i> Terlama
-        </a>
+                {{-- Date Filter --}}
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Rentang Tanggal</label>
+                    <div class="flex flex-col gap-2">
+                        <input type="date" name="date_from" value="{{ request('date_from') }}" class="w-full px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold text-slate-500 focus:ring-2 focus:ring-brandTeal transition-all">
+                        <input type="date" name="date_to" value="{{ request('date_to') }}" class="w-full px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold text-slate-500 focus:ring-2 focus:ring-brandTeal transition-all">
+                    </div>
+                </div>
+
+                {{-- Sifat & Status Expanded List --}}
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Sifat & Status</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select name="sifat" class="px-3 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-[10px] font-black uppercase tracking-wider focus:ring-2 focus:ring-brandTeal cursor-pointer">
+                            <option value="">Semua Sifat</option>
+                            <option value="Rahasia" {{ request('sifat') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
+                            <option value="Penting" {{ request('sifat') == 'Penting' ? 'selected' : '' }}>Penting</option>
+                            <option value="Disegerakan" {{ request('sifat') == 'Disegerakan' ? 'selected' : '' }}>Disegerakan</option>
+                        </select>
+                        <select name="status" class="px-3 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-[10px] font-black uppercase tracking-wider focus:ring-2 focus:ring-brandTeal cursor-pointer">
+                            <option value="">Semua Status</option>
+                            @foreach(['Menunggu', 'Diproses', 'Disetujui', 'Ditolak', 'Selesai'] as $st)
+                                <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ $st }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    {{-- Sort & Submit --}}
+                    <div class="flex gap-2">
+                        <select name="sort" class="w-1/2 px-3 py-3 bg-brandDark text-white border-none rounded-2xl text-[10px] font-black uppercase tracking-wider cursor-pointer">
+                            <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Terbaru ↓</option>
+                            <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Terlama ↑</option>
+                        </select>
+                        <button type="submit" class="w-1/2 bg-brandTeal text-white rounded-2xl flex items-center justify-center hover:bg-teal-600 transition-all shadow-lg shadow-teal-500/20">
+                            <i class="material-symbols-outlined font-bold">filter_alt</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @if(request()->anyFilled(['search', 'unit', 'min_nominal', 'max_nominal', 'date_from', 'date_to', 'status', 'sifat']))
+            <div class="flex justify-center pt-2">
+                <a href="{{ route('surat.index') }}" class="text-[10px] font-black text-rose-500 uppercase tracking-[0.2em] flex items-center gap-2 hover:opacity-70 transition-all">
+                    <i class="material-symbols-outlined text-sm">restart_alt</i> Reset Pencarian
+                </a>
+            </div>
+            @endif
+        </form>
     </div>
-</div>
 
     {{-- Table Section --}}
     <div class="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-neutral-800 overflow-hidden">
