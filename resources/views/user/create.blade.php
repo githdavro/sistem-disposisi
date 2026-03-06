@@ -49,14 +49,17 @@
 
                         {{-- Role --}}
                         <div class="space-y-2">
-                            <label class="text-sm font-bold text-gray-700 ml-1">Otoritas / Role <span class="text-red-500">*</span></label>
-                            <select name="role" class="w-full px-5 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none cursor-pointer" required>
-                                <option value="">Pilih Role Akses</option>
-                                @foreach($roles as $role)
-                                    <option value="{{ $role->name }}" {{ old('role') == $role->name ? 'selected' : '' }}>{{ $role->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                                <label class="text-sm font-bold text-gray-700 ml-1">Otoritas / Role <span class="text-red-500">*</span></label>
+                                <select name="role" class="w-full px-5 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none cursor-pointer @error('role') border-red-300 @enderror" required>
+                                    <option value="" disabled selected>Pilih Role Akses</option>
+                                    @foreach($roles as $role)
+                                        <option value="{{ $role->name }}" {{ old('role') == $role->name ? 'selected' : '' }}>
+                                            {{ $role->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('role') <p class="text-red-500 text-xs mt-1 ml-1 font-bold">{{ $message }}</p> @enderror
+                            </div>
 
                         {{-- Unit --}}
                         <div class="space-y-2">

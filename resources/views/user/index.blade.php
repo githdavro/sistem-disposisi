@@ -62,16 +62,21 @@
                         {{-- Role Badge --}}
                         <td class="px-6 py-4 whitespace-nowrap">
                             @php
-                                $role = $user->getRoleNames()->first();
-                                $colorClasses = match($role) {
-                                    'Admin' => 'bg-purple-50 text-purple-700 border-purple-100',
-                                    'Direktur' => 'bg-indigo-50 text-indigo-700 border-indigo-100',
+                                $role = $user->roles->first(); // Mengambil object role pertama
+                                $roleName = $role ? $role->name : 'No Role';
+                                
+                                // Logika warna dinamis berdasarkan nama role
+                                $colorClasses = match($roleName) {
+                                    'Admin'     => 'bg-purple-50 text-purple-700 border-purple-100',
+                                    'Direktur'  => 'bg-indigo-50 text-indigo-700 border-indigo-100',
                                     'Pengadaan' => 'bg-amber-50 text-amber-700 border-amber-100',
-                                    default => 'bg-emerald-50 text-emerald-700 border-emerald-100',
+                                    'Staff'     => 'bg-emerald-50 text-emerald-700 border-emerald-100',
+                                    default     => 'bg-gray-50 text-gray-600 border-gray-200',
                                 };
                             @endphp
                             <span class="inline-flex items-center px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border {{ $colorClasses }}">
-                                {{ $role }}
+                                <span class="w-1.5 h-1.5 rounded-full bg-current mr-2 opacity-50"></span>
+                                {{ $roleName }}
                             </span>
                         </td>
 

@@ -26,11 +26,11 @@ class UserController extends Controller
     }
     
     public function create()
-    {
-        $unit = Unit::all();
-        $roles = Role::all();
-        return view('user.create', compact('unit', 'roles'));
-    }
+{
+    $unit = Unit::all();
+    $roles = \Spatie\Permission\Models\Role::all(); // Pastikan ambil dari Spatie
+    return view('user.create', compact('unit', 'roles'));
+}
     
     public function store(Request $request)
     {

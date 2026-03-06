@@ -24,31 +24,44 @@
         @endif
     </div>
 
-    {{-- Filter Section --}}
-    <div class="bg-white dark:bg-neutral-900 rounded-[2rem] shadow-sm border border-slate-100 dark:border-neutral-800 p-3 overflow-x-auto no-scrollbar">
-        <form method="GET" action="{{ route('surat.index') }}" class="flex items-center gap-2 min-w-max">
-            <input type="hidden" name="filter" value="status">
-            
-            <button type="submit" name="status" value="" 
-                class="px-6 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all {{ !request('status') ? 'bg-brandDark dark:bg-brandTeal text-white shadow-lg' : 'text-slate-400 dark:text-neutral-500 hover:bg-slate-50 dark:hover:bg-neutral-800' }}">
-                Semua
-            </button>
+   {{-- Filter & Sort Container --}}
+<div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-6">
+    
+    {{-- Status Filter --}}
+    <div class="bg-white dark:bg-neutral-900 rounded-3xl shadow-sm border border-slate-100 dark:border-neutral-800 p-2 flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
+        {{-- Tombol Semua --}}
+        <a href="{{ request()->fullUrlWithQuery(['status' => '']) }}" 
+           class="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all {{ !request('status') ? 'bg-brandDark text-white shadow-md' : 'text-slate-400 hover:bg-slate-50' }}">
+            Semua
+        </a>
 
-            @foreach([
-                'Menunggu' => 'bg-amber-500', 
-                'Diproses' => 'bg-brandTeal', 
-                'Disetujui' => 'bg-emerald-500', 
-                'Ditolak' => 'bg-rose-500', 
-                'Selesai' => 'bg-brandDark'
-            ] as $status => $color)
-                <button type="submit" name="status" value="{{ $status }}" 
-                    class="px-6 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2 {{ request('status') == $status ? $color . ' text-white shadow-lg' : 'text-slate-400 dark:text-neutral-500 hover:bg-slate-50 dark:hover:bg-neutral-800' }}">
-                    <span class="w-2 h-2 rounded-full {{ request('status') == $status ? 'bg-white' : $color }}"></span>
-                    {{ $status }}
-                </button>
-            @endforeach
-        </form>
+        @foreach([
+            'Menunggu' => 'bg-amber-500', 
+            'Diproses' => 'bg-brandTeal', 
+            'Disetujui' => 'bg-emerald-500', 
+            'Ditolak' => 'bg-rose-500', 
+            'Selesai' => 'bg-slate-700'
+        ] as $name => $color)
+            <a href="{{ request()->fullUrlWithQuery(['status' => $name]) }}" 
+               class="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2 {{ request('status') == $name ? $color . ' text-white shadow-md' : 'text-slate-400 hover:bg-slate-50' }}">
+                <span class="w-2 h-2 rounded-full {{ request('status') == $name ? 'bg-white' : $color }}"></span>
+                {{ $name }}
+            </a>
+        @endforeach
     </div>
+
+    {{-- Sorting Control --}}
+    <div class="flex items-center bg-slate-100 dark:bg-neutral-800 p-1.5 rounded-2xl border border-slate-200 dark:border-neutral-700 shrink-0">
+        <a href="{{ request()->fullUrlWithQuery(['sort' => 'desc']) }}" 
+           class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all {{ request('sort', 'desc') == 'desc' ? 'bg-white dark:bg-neutral-700 text-brandTeal shadow-sm' : 'text-slate-400' }}">
+            <i class="material-symbols-outlined text-sm">arrow_downward</i> Terbaru
+        </a>
+        <a href="{{ request()->fullUrlWithQuery(['sort' => 'asc']) }}" 
+           class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all {{ request('sort') == 'asc' ? 'bg-white dark:bg-neutral-700 text-brandTeal shadow-sm' : 'text-slate-400' }}">
+            <i class="material-symbols-outlined text-sm">arrow_upward</i> Terlama
+        </a>
+    </div>
+</div>
 
     {{-- Table Section --}}
     <div class="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-neutral-800 overflow-hidden">

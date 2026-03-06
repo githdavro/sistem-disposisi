@@ -52,9 +52,12 @@
                         <div class="space-y-2">
                             <label class="text-sm font-bold text-gray-700 ml-1">Peran / Role <span class="text-red-500">*</span></label>
                             <select name="role" class="w-full px-5 py-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none cursor-pointer" required>
-                                <option value="">Pilih Role</option>
+                                <option value="" disabled>Pilih Role</option>
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->name }}" {{ old('role', $userRole) == $role->name ? 'selected' : '' }}>{{ $role->name }}</option>
+                                    {{-- Menggunakan $user->hasRole() untuk mengecek role aktif --}}
+                                    <option value="{{ $role->name }}" {{ (old('role') ?? $user->roles->first()->name ?? '') == $role->name ? 'selected' : '' }}>
+                                        {{ $role->name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>

@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoleController;
 
 // ===================
 // Landing Page
@@ -45,14 +46,22 @@ Route::middleware('auth')->group(function () {
     Route::resource('surat', SuratController::class);
     Route::post('/surat/{id}/proses', [SuratController::class, 'proses'])->name('surat.proses');
     Route::post('/surat/{id}/kirim-ke-unit', [SuratController::class, 'kirimKeUnit'])->name('surat.kirim-ke-unit');
+    // Di dalam group middleware auth, tambahkan route berikut:
+Route::get('/surat/lampiran/all', [SuratController::class, 'lampiran'])->name('surat.lampiran');// Di dalam group middleware auth, tambahkan route berikut:
+Route::get('/surat/lampiran/all', [SuratController::class, 'lampiran'])->name('surat.lampiran');
 
-    // Approval
-    Route::post('/approval/{id}/approve', [ApprovalController::class, 'approve'])->name('approval.approve');
-    Route::post('/approval/{id}/reject', [ApprovalController::class, 'reject'])->name('approval.reject');
+    // Role & Permission Management (Hanya Admin)
+    Route::group(['middleware' => ['role:Admin']], function () {
+        Route::resource('roles', RoleController::class);
+    });
 
     // User & Unit
     Route::resource('user', UserController::class);
     Route::resource('unit', UnitController::class);
+
+    // Approval
+    Route::post('/approval/{id}/approve', [ApprovalController::class, 'approve'])->name('approval.approve');
+    Route::post('/approval/{id}/reject', [ApprovalController::class, 'reject'])->name('approval.reject');
 
     // Notifikasi
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');

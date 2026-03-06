@@ -16,25 +16,38 @@ use Illuminate\Support\Str;
 
 class SuratController extends Controller
 {
-    public function index()
+    public function index(Request $request)
 {
     $user = Auth::user();
     
-    if ($user->hasRole('Admin')) {
-        $surat = Surat::with(['pengirim', 'unitTujuan'])->paginate(10);
+    // Ambil parameter status dan sort (default: desc)
+    $status = $request->get('status');
+    $sort = $request->get('sort', default: 'desc');
+
+    $query = Surat::with(['pengirim', 'unitTujuan']);
+
+    // 1. Filter berdasarkan Role
+    if ($user->hasRole('Admin') || $user->hasRole('Pengadaan')) {
+        // Tidak ada batasan akses awal
     } elseif ($user->hasRole('Unit')) {
-        $surat = Surat::where(function($query) use ($user) {
-            $query->where('pengirim_id', $user->id)
-                  ->orWhere('unit_tujuan_id', $user->unit_id);
-        })->with(['pengirim', 'unitTujuan'])->paginate(10);
-    } elseif ($user->hasRole('Pengadaan')) {
-        $surat = Surat::with(['pengirim', 'unitTujuan'])->paginate(perPage: 10);
+        $query->where(function($q) use ($user) {
+            $q->where('pengirim_id', $user->id)
+              ->orWhere('unit_tujuan_id', $user->unit_id);
+        });
     } elseif ($user->hasRole('Direktur')) {
-        $surat = Surat::whereHas('approval', function ($query) {
-            $query->where('approver_id', Auth::id());
-        })->with(['pengirim', 'unitTujuan'])->paginate(10);
+        $query->whereHas('approval', function ($q) {
+            $q->where('approver_id', Auth::id());
+        });
     }
-    
+
+    // 2. Filter berdasarkan Status (Jika user memilih filter)
+    $query->when($status, function ($q) use ($status) {
+        return $q->where('status', $status);
+    });
+
+    // 3. Eksekusi Sorting dan Pagination
+    $surat = $query->orderBy('created_at', $sort)->paginate(10);
+
     return view('surat.index', compact('surat'));
 }
     
@@ -46,30 +59,30 @@ class SuratController extends Controller
     
     public function store(Request $request)
 {
-    // 1️⃣ VALIDASI
+    // VALIDASI
     $request->validate([
         'unit_tujuan_id' => 'required|exists:unit,id',
-        'file' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        'file' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         'catatan' => 'nullable|string',
         'sifat' => 'required|in:Rahasia,Penting,Disegerakan',
         'nominal' => 'required|numeric|min:0',
     ]);
 
-    // 2️⃣ CEK FILE
-    if (!$request->hasFile('file')) {
-        return back()
-            ->withErrors(['file' => 'File surat wajib diupload'])
-            ->withInput();
-    }
-
     $user = Auth::user();
 
-    // 3️⃣ UPLOAD FILE
-    $file = $request->file('file');
-    $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-    Storage::disk('public')->putFileAs('surat', $file, $fileName);
+    $fileName = null;
 
-    // 4️⃣ CREATE SURAT (nomor surat akan otomatis digenerate oleh event)
+    // UPLOAD FILE JIKA ADA
+    if ($request->hasFile('file')) {
+
+        $file = $request->file('file');
+
+        $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+
+        Storage::disk('public')->putFileAs('surat', $file, $fileName);
+    }
+
+    // CREATE SURAT
     $surat = Surat::create([
         'pengirim_id' => $user->id,
         'unit_tujuan_id' => $request->unit_tujuan_id,
@@ -80,11 +93,13 @@ class SuratController extends Controller
         'status' => 'Menunggu',
     ]);
 
-    // 5️⃣ LOGIKA APPROVAL
+    // LOGIKA APPROVAL
     if ($request->nominal > 1000000) {
+
         $direktur = User::role('Direktur')->first();
 
         if ($direktur) {
+
             Approval::create([
                 'surat_id' => $surat->id,
                 'approver_id' => $direktur->id,
@@ -100,10 +115,13 @@ class SuratController extends Controller
                 'pesan' => 'Ada surat yang menunggu approval Anda dengan nominal lebih dari 1 juta.',
             ]);
         }
+
     } else {
+
         $pengadaan = User::role('Pengadaan')->first();
 
         if ($pengadaan) {
+
             Notifikasi::create([
                 'user_id' => $pengadaan->id,
                 'surat_id' => $surat->id,
@@ -331,4 +349,84 @@ class SuratController extends Controller
         return redirect()->route('surat.show', $id)
             ->with('success', 'Surat berhasil dikirim ke unit tujuan.');
     }
+
+    public function lampiran(Request $request)
+{
+    $user = Auth::user();
+    
+    $query = Surat::with(['pengirim.unit', 'unitTujuan'])
+        ->whereNotNull('file') // Hanya surat yang memiliki lampiran
+        ->orderBy('created_at', 'desc');
+    
+    // Filter berdasarkan role
+    if (!$user->hasRole('Admin') && !$user->hasRole('Pengadaan')) {
+        if ($user->hasRole('Unit')) {
+            $query->where(function($q) use ($user) {
+                $q->where('pengirim_id', $user->id)
+                  ->orWhere('unit_tujuan_id', $user->unit_id);
+            });
+        } elseif ($user->hasRole('Direktur')) {
+            $query->whereHas('approval', function($q) use ($user) {
+                $q->where('approver_id', $user->id);
+            });
+        }
+    }
+    
+    // Filter pencarian
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('file', 'like', "%{$search}%")
+              ->orWhere('catatan', 'like', "%{$search}%")
+              ->orWhereHas('pengirim', function($sq) use ($search) {
+                  $sq->where('name', 'like', "%{$search}%");
+              });
+        });
+    }
+    
+    // Filter unit pengirim
+    if ($request->filled('unit_pengirim')) {
+        $query->whereHas('pengirim', function($q) use ($request) {
+            $q->where('unit_id', $request->unit_pengirim);
+        });
+    }
+    
+    // Filter unit tujuan
+    if ($request->filled('unit_tujuan')) {
+        $query->where('unit_tujuan_id', $request->unit_tujuan);
+    }
+    
+    // Filter periode
+    if ($request->filled('periode')) {
+        $now = now();
+        switch($request->periode) {
+            case 'hari':
+                $query->whereDate('created_at', $now->toDateString());
+                break;
+            case 'minggu':
+                $query->whereBetween('created_at', [$now->startOfWeek(), $now->endOfWeek()]);
+                break;
+            case 'bulan':
+                $query->whereMonth('created_at', $now->month)
+                      ->whereYear('created_at', $now->year);
+                break;
+            case 'tahun':
+                $query->whereYear('created_at', $now->year);
+                break;
+        }
+    }
+    
+    $surat = $query->paginate(15);
+    
+    // Data untuk statistik
+    $totalSurat = Surat::count();
+    $totalLampiran = Surat::whereNotNull('file')->count();
+    $suratBulanIni = Surat::whereMonth('created_at', now()->month)
+                          ->whereYear('created_at', now()->year)
+                          ->count();
+    
+    $units = Unit::all();
+    
+    return view('surat.lampiran', compact('surat', 'units', 'totalSurat', 'totalLampiran', 'suratBulanIni'));
+}
 }

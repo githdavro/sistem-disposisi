@@ -39,19 +39,27 @@
                     <h2 class="text-2xl font-bold text-gray-900">{{ $user->name }}</h2>
                     <p class="text-gray-500 font-medium mb-4">{{ $user->email }}</p>
                     
-                    @php
-                        $role = $user->getRoleNames()->first();
-                        $roleClass = match($role) {
-                            'Admin' => 'bg-purple-100 text-purple-700',
-                            'Direktur' => 'bg-indigo-100 text-indigo-700',
-                            'Pengadaan' => 'bg-yellow-100 text-yellow-800',
-                            default => 'bg-green-100 text-green-700',
-                        };
-                    @endphp
-                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-tighter {{ $roleClass }}">
-                        {{ $role }}
-                    </span>
-                </div>
+                   {{-- Ganti bagian @php dan span badge di kartu kiri --}}
+@php
+    $userRole = $user->roles->first();
+    $roleName = $userRole ? $userRole->name : 'User';
+    $roleClass = match($roleName) {
+        'Admin'     => 'bg-purple-100 text-purple-700',
+        'Direktur'  => 'bg-indigo-100 text-indigo-700',
+        'Pengadaan' => 'bg-yellow-100 text-yellow-800',
+        default     => 'bg-emerald-100 text-emerald-700',
+    };
+@endphp
+
+<div class="flex flex-col items-center">
+    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-tighter {{ $roleClass }} mb-2">
+        {{ $roleName }}
+    </span>
+    {{-- Menambahkan info permission jika perlu (optional) --}}
+    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+        {{ $user->getPermissionsCountAttribute ?? $user->getAllPermissions()->count() }} Hak Akses Aktif
+    </p>
+</div>
 
                 <div class="mt-8 pt-8 border-t border-gray-50 space-y-4 text-left">
                     <div class="flex items-center justify-between text-sm">
@@ -69,7 +77,7 @@
         {{-- KARTU KANAN: STATISTIK & DETAIL --}}
         <div class="lg:col-span-2 space-y-8">
             
-{{--  --}}ik Grid --}}
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {{-- Surat Terkirim --}}
                 <div class="bg-blue-600 rounded-[2rem] p-8 text-white shadow-xl shadow-blue-100 flex items-center justify-between">

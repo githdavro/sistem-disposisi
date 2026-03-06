@@ -56,9 +56,29 @@
         @if(Auth::user()->hasPermissionTo('surat-list'))
         <a href="{{ route('surat.index') }}"
            class="flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 group
-                  {{ request()->routeIs('surat.*') ? 'bg-teal-50 text-[#00A99D] font-bold' : 'hover:bg-slate-50 text-slate-500 hover:text-slate-900' }}">
-            <span class="material-symbols-outlined {{ request()->routeIs('surat.*') ? 'text-[#00A99D]' : 'text-slate-400 group-hover:text-slate-600' }}">description</span>
+                  {{ request()->routeIs('surat.*') && !request()->routeIs('surat.lampiran') ? 'bg-teal-50 text-[#00A99D] font-bold' : 'hover:bg-slate-50 text-slate-500 hover:text-slate-900' }}">
+            <span class="material-symbols-outlined {{ request()->routeIs('surat.*') && !request()->routeIs('surat.lampiran') ? 'text-[#00A99D]' : 'text-slate-400 group-hover:text-slate-600' }}">description</span>
             <span x-show="sidebarOpen" class="ml-3 text-[14px]">Daftar Surat</span>
+        </a>
+        @endif
+
+        {{-- MENU GALERI FILE BARU --}}
+        @if(Auth::user()->hasPermissionTo('surat-list'))
+        <a href="{{ route('surat.lampiran') }}"
+           class="flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 group
+                  {{ request()->routeIs('surat.lampiran') ? 'bg-teal-50 text-[#00A99D] font-bold' : 'hover:bg-slate-50 text-slate-500 hover:text-slate-900' }}">
+            <span class="material-symbols-outlined {{ request()->routeIs('surat.lampiran') ? 'text-[#00A99D]' : 'text-slate-400 group-hover:text-slate-600' }}">photo_library</span>
+            <span x-show="sidebarOpen" class="ml-3 text-[14px] flex items-center gap-2">
+                Galeri File
+                @php
+                    $totalLampiran = \App\Models\Surat::whereNotNull('file')->count();
+                @endphp
+                @if($totalLampiran > 0)
+                <span class="bg-brandTeal/10 text-brandTeal text-[9px] font-black px-1.5 py-0.5 rounded-full">
+                    {{ $totalLampiran }}
+                </span>
+                @endif
+            </span>
         </a>
         @endif
 
@@ -68,6 +88,16 @@
                   {{ request()->routeIs('user.*') ? 'bg-teal-50 text-[#00A99D] font-bold' : 'hover:bg-slate-50 text-slate-500 hover:text-slate-900' }}">
             <span class="material-symbols-outlined {{ request()->routeIs('user.*') ? 'text-[#00A99D]' : 'text-slate-400 group-hover:text-slate-600' }}">group</span>
             <span x-show="sidebarOpen" class="ml-3 text-[14px]">Manajemen User</span>
+        </a>
+        @endif
+
+        {{-- Sisipkan di bawah menu Manajemen User --}}
+        @if(Auth::user()->hasRole('Admin'))
+        <a href="{{ route('roles.index') }}"
+        class="flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 group
+                {{ request()->routeIs('roles.*') ? 'bg-teal-50 text-[#00A99D] font-bold' : 'hover:bg-slate-50 text-slate-500 hover:text-slate-900' }}">
+            <span class="material-symbols-outlined {{ request()->routeIs('roles.*') ? 'text-[#00A99D]' : 'text-slate-400 group-hover:text-slate-600' }}">verified_user</span>
+            <span x-show="sidebarOpen" class="ml-3 text-[14px]">Hak Akses (Roles)</span>
         </a>
         @endif
 

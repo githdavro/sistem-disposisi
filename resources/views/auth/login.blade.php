@@ -2,8 +2,9 @@
     {{-- Sisi Kiri: Branding & Visual --}}
     <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-brandTeal via-teal-600 to-brandDark p-12 flex-col justify-between relative overflow-hidden">
         {{-- Dekorasi Abstract --}}
-        <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-        <div class="absolute bottom-0 left-0 w-48 h-48 bg-brandOrange/20 rounded-full blur-3xl -ml-20 -mb-20"></div>
+          <div class="absolute -top-24 -left-24 w-64 h-64 bg-brandTeal/5 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 -right-24 w-80 h-80 bg-brandOrange/5 rounded-full blur-3xl"></div>
+
 
         <div class="z-10">
             {{-- Logo GPM --}}
