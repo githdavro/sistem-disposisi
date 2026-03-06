@@ -3,8 +3,8 @@
 @section('title', 'Arsip & Daftar Surat | GPM')
 
 @section('content')
-<div class="w-full space-y-6 pb-12">
-    {{-- Header Section (Tetap) --}}
+<div class="w-full space-y-8 pb-12">
+    {{-- Header Section --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
             <h1 class="text-3xl font-extrabold text-brandDark dark:text-white tracking-tight flex items-center gap-3">
@@ -13,91 +13,141 @@
                 </span>
                 Arsip & Daftar Surat
             </h1>
+            <p class="text-slate-500 dark:text-neutral-400 mt-1 font-medium ml-14">Monitoring alur disposisi dan status dokumen internal.</p>
         </div>
         
         @if(Auth::user()->hasPermissionTo('surat-create'))
-            <a href="{{ route('surat.create') }}" class="inline-flex items-center justify-center px-8 py-4 bg-brandTeal hover:bg-teal-600 text-white text-sm font-black rounded-[1.5rem] shadow-xl transition-all active:scale-95 group">
-                <span class="material-symbols-outlined mr-2 text-xl font-bold">add_circle</span>
+            <a href="{{ route('surat.create') }}" class="inline-flex items-center justify-center px-8 py-4 bg-brandTeal hover:bg-teal-600 text-white text-sm font-black rounded-[1.5rem] shadow-xl shadow-teal-900/10 transition-all transform active:scale-95 group">
+                <span class="material-symbols-outlined mr-2 text-xl font-bold group-hover:rotate-90 transition-transform">add_circle</span>
                 BUAT SURAT BARU
             </a>
         @endif
     </div>
 
-    {{-- ADVANCED FILTER BOX --}}
-    <div class="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-neutral-800 p-8">
-        <form action="{{ route('surat.index') }}" method="GET" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+   {{-- FILTER & SORT CONTAINER --}}
+<div x-data="{ expanded: {{ request()->anyFilled(['unit', 'min_nominal', 'max_nominal', 'date_from', 'date_to', 'sifat']) ? 'true' : 'false' }} }" class="w-full">
+    
+    <form action="{{ route('surat.index') }}" method="GET" class="bg-white dark:bg-neutral-900 rounded-[2rem] shadow-sm border border-slate-100 dark:border-neutral-800 p-3 transition-all duration-500">
+        
+        {{-- Bar Utama (Minimalis) --}}
+        <div class="flex flex-col lg:flex-row items-center gap-3">
+            
+            {{-- Search Utama --}}
+            <div class="relative flex-1 w-full group">
+                <i class="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brandTeal transition-colors">search</i>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor surat atau perihal..." 
+                       class="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-neutral-800 border-none rounded-[1.5rem] text-xs font-bold focus:ring-2 focus:ring-brandTeal/20 transition-all placeholder:text-slate-400">
+            </div>
+
+            {{-- Action Group --}}
+            <div class="flex items-center gap-2 w-full lg:w-auto">
+                {{-- Quick Status --}}
+                <select name="status" onchange="this.form.submit()" class="flex-1 lg:w-44 px-5 py-4 bg-slate-50 dark:bg-neutral-800 border-none rounded-[1.5rem] text-[10px] font-black uppercase tracking-wider focus:ring-2 focus:ring-brandTeal/20 cursor-pointer transition-all">
+                    <option value="">Semua Status</option>
+                    @foreach(['Menunggu', 'Diproses', 'Disetujui', 'Ditolak', 'Selesai'] as $st)
+                        <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ $st }}</option>
+                    @endforeach
+                </select>
+
+                {{-- Quick Sort --}}
+                <select name="sort" onchange="this.form.submit()" class="hidden md:block px-5 py-4 bg-slate-50 dark:bg-neutral-800 border-none rounded-[1.5rem] text-[10px] font-black uppercase tracking-wider focus:ring-2 focus:ring-brandTeal/20 cursor-pointer transition-all">
+                    <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Terbaru ↓</option>
+                    <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Terlama ↑</option>
+                </select>
+
+                {{-- Toggle Advanced --}}
+                <button type="button" @click="expanded = !expanded" 
+                        :class="expanded ? 'bg-brandDark text-white' : 'bg-slate-100 dark:bg-neutral-800 text-slate-500'"
+                        class="w-14 h-14 flex items-center justify-center rounded-[1.5rem] hover:opacity-80 transition-all shrink-0">
+                    <i class="material-symbols-outlined transition-transform duration-300" :class="expanded ? 'rotate-180' : ''">tune</i>
+                </button>
+
+                {{-- Submit Button --}}
+                <button type="submit" class="px-8 h-14 bg-brandTeal text-white text-[11px] font-black uppercase tracking-widest rounded-[1.5rem] shadow-lg shadow-teal-500/20 hover:bg-teal-600 transition-all active:scale-95 shrink-0">
+                    Cari
+                </button>
+            </div>
+        </div>
+
+        {{-- Advanced Options (Area Expand) --}}
+        <div x-show="expanded" 
+             x-collapse
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform -translate-y-2"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             class="px-4 overflow-hidden">
+            
+            <div class="pt-8 pb-4 grid grid-cols-1 md:grid-cols-3 gap-10 border-t border-slate-50 dark:border-neutral-800 mt-5">
                 
-                {{-- Identitas & Unit --}}
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Identitas & Unit</label>
-                    <div class="relative">
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari No. Surat..." 
-                               class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal transition-all">
-                        <i class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-xl">search</i>
-                    </div>
-                    <input type="text" name="unit" value="{{ request('unit') }}" placeholder="Cari Asal/Tujuan..." 
-                           class="w-full px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal transition-all">
-                </div>
-
-                {{-- Nominal Range --}}
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Filter Nominal (Rp)</label>
-                    <div class="flex flex-col gap-2">
-                        <input type="number" name="min_nominal" value="{{ request('min_nominal') }}" placeholder="Min" class="w-full px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal transition-all">
-                        <input type="number" name="max_nominal" value="{{ request('max_nominal') }}" placeholder="Max" class="w-full px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal transition-all">
-                    </div>
-                </div>
-
-                {{-- Date Filter --}}
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Rentang Tanggal</label>
-                    <div class="flex flex-col gap-2">
-                        <input type="date" name="date_from" value="{{ request('date_from') }}" class="w-full px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold text-slate-500 focus:ring-2 focus:ring-brandTeal transition-all">
-                        <input type="date" name="date_to" value="{{ request('date_to') }}" class="w-full px-4 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold text-slate-500 focus:ring-2 focus:ring-brandTeal transition-all">
-                    </div>
-                </div>
-
-                {{-- Sifat & Status Expanded List --}}
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Sifat & Status</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <select name="sifat" class="px-3 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-[10px] font-black uppercase tracking-wider focus:ring-2 focus:ring-brandTeal cursor-pointer">
-                            <option value="">Semua Sifat</option>
-                            <option value="Rahasia" {{ request('sifat') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
-                            <option value="Penting" {{ request('sifat') == 'Penting' ? 'selected' : '' }}>Penting</option>
-                            <option value="Disegerakan" {{ request('sifat') == 'Disegerakan' ? 'selected' : '' }}>Disegerakan</option>
-                        </select>
-                        <select name="status" class="px-3 py-3 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-[10px] font-black uppercase tracking-wider focus:ring-2 focus:ring-brandTeal cursor-pointer">
-                            <option value="">Semua Status</option>
-                            @foreach(['Menunggu', 'Diproses', 'Disetujui', 'Ditolak', 'Selesai'] as $st)
-                                <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ $st }}</option>
+                {{-- Col 1: Origin & Property --}}
+                <div class="space-y-4">
+                    <label class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+                        <span class="w-1 h-1 rounded-full bg-brandTeal"></span> Identitas & Sifat
+                    </label>
+                    <div class="space-y-3">
+                        <input type="text" name="unit" value="{{ request('unit') }}" placeholder="Asal Unit / Pengirim..." 
+                               class="w-full px-5 py-3.5 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal/20 transition-all">
+                        <select name="sifat" class="w-full px-5 py-3.5 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-[10px] font-black uppercase tracking-wider focus:ring-2 focus:ring-brandTeal/20 transition-all cursor-pointer">
+                            <option value="">Pilih Sifat Surat</option>
+                            @foreach(['Rahasia', 'Penting', 'Disegerakan'] as $s)
+                                <option value="{{ $s }}" {{ request('sifat') == $s ? 'selected' : '' }}>{{ $s }}</option>
                             @endforeach
                         </select>
                     </div>
-                    
-                    {{-- Sort & Submit --}}
-                    <div class="flex gap-2">
-                        <select name="sort" class="w-1/2 px-3 py-3 bg-brandDark text-white border-none rounded-2xl text-[10px] font-black uppercase tracking-wider cursor-pointer">
-                            <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Terbaru ↓</option>
-                            <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Terlama ↑</option>
-                        </select>
-                        <button type="submit" class="w-1/2 bg-brandTeal text-white rounded-2xl flex items-center justify-center hover:bg-teal-600 transition-all shadow-lg shadow-teal-500/20">
-                            <i class="material-symbols-outlined font-bold">filter_alt</i>
-                        </button>
+                </div>
+
+                {{-- Col 2: Financial Range --}}
+                <div class="space-y-4">
+                    <label class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+                        <span class="w-1 h-1 rounded-full bg-brandTeal"></span> Estimasi Nominal
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <div class="relative flex-1">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400">Rp</span>
+                            <input type="number" name="min_nominal" value="{{ request('min_nominal') }}" placeholder="Min" 
+                                   class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal/20 transition-all">
+                        </div>
+                        <span class="text-slate-300">/</span>
+                        <div class="relative flex-1">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400">Rp</span>
+                            <input type="number" name="max_nominal" value="{{ request('max_nominal') }}" placeholder="Max" 
+                                   class="w-full pl-10 pr-4 py-3.5 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal/20 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Col 3: Timeline --}}
+                <div class="space-y-4">
+                    <label class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+                        <span class="w-1 h-1 rounded-full bg-brandTeal"></span> Rentang Waktu
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="relative group">
+                            <i class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-brandTeal">calendar_today</i>
+                            <input type="date" name="date_from" value="{{ request('date_from') }}" 
+                                   class="w-full pl-11 pr-3 py-3.5 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal/20 text-slate-500">
+                        </div>
+                        <div class="relative group">
+                            <i class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-brandTeal">event_repeat</i>
+                            <input type="date" name="date_to" value="{{ request('date_to') }}" 
+                                   class="w-full pl-11 pr-3 py-3.5 bg-slate-50 dark:bg-neutral-800 border-none rounded-2xl text-xs font-bold focus:ring-2 focus:ring-brandTeal/20 text-slate-500">
+                        </div>
                     </div>
                 </div>
             </div>
 
+            {{-- Footer Filter (Reset) --}}
             @if(request()->anyFilled(['search', 'unit', 'min_nominal', 'max_nominal', 'date_from', 'date_to', 'status', 'sifat']))
-            <div class="flex justify-center pt-2">
-                <a href="{{ route('surat.index') }}" class="text-[10px] font-black text-rose-500 uppercase tracking-[0.2em] flex items-center gap-2 hover:opacity-70 transition-all">
-                    <i class="material-symbols-outlined text-sm">restart_alt</i> Reset Pencarian
+            <div class="mt-4 py-3 flex justify-center border-t border-slate-50 dark:border-neutral-800/50">
+                <a href="{{ route('surat.index') }}" class="group text-[10px] font-black text-rose-500 uppercase tracking-[0.2em] flex items-center gap-2 hover:text-rose-600 transition-all">
+                    <i class="material-symbols-outlined text-sm group-hover:rotate-180 transition-transform duration-500">restart_alt</i> 
+                    Reset Semua Parameter
                 </a>
             </div>
             @endif
-        </form>
-    </div>
+        </div>
+    </form>
+</div>
 
     {{-- Table Section --}}
     <div class="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-neutral-800 overflow-hidden">
